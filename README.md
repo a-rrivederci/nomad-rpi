@@ -4,9 +4,9 @@ Nomad modules for Raspberry Pi
 
 ## Index
 
-1. [Setup](##setup)
-2. [Testing](##testing)
-3. [Execution](##execution)
+1. [Setup](#setup)
+2. [Testing](#testing)
+3. [Execution](#execution)
 
 &nbsp;
 
