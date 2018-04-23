@@ -1,10 +1,7 @@
 import pyrebase
 import sys
 
-from rover import Rover
-
-with open('test.txt', 'w') as f:
-    f.write('test text\n')
+from api import Rover
 
 # DB = None
 # ROVER = None

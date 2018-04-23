@@ -2,43 +2,68 @@
 
 Nomad modules for Raspberry Pi
 
-## NOMAD :robot:
+## Index
 
-**Nomad** is the terrestrial agent of the Triple-N system. It is an explorer rover enabled with an object detecting trained model which can be controlled remotely.
+1. [Setup](#setup)
+2. [Testing](#testing)
+3. [Execution](#execution)
 
----  
+&nbsp;
 
 ## Setup
 
-### Raspberry Pi
+Setting up the Pi
+>Tested with Raspberry Pi 3 Model B
 
-Tested with Raspberry Pi 3 Model B
-
-1. `sudo raspi-config` and reboot
+1. `sudo raspi-config`
     - change user password
     - set Hostname (Network Options)
     - connect to WiFi (Network Options)
     - enable camera (Interfacing Options)
     - set Memory Split to 16 MB (Advanced Options)
-2. clone this repository: `git clone https://github.com/attackle/nomad.git` and `cd nomad`
-3. `pip3 install -r requirements.txt`
-4. `sudo apt install vlc libav-tools`
-5. create script to livestream: `cd ~` then
-    - `echo "raspivid -t 0 -vf -hf -w 640 -h 480 -fps 15 -b 1000000 -o - | cvlc -vvv stream:///dev/stdin --sout '#standard{access=http,mux=ts,dst=:8090}' :demux=h264" > stream.sh`
-    	- `-t 0 `: no timeout (stream indefinitely)
-    	- `-vf`: vertical flip (flip video vertically)
-    	- `-hf1`: horizontal flip (flip video horizontally)
-    	- `-w 640 -h 480`: video size 640x480 px
-    	- `-fps 15`: frames per second
-    	- `-b 1000000`: bit rate
-    	- `-o -`: output to STDIN
-    	- `access=http`: livestream can be accessed via HTTP
-    	- `dst=:8090`: destination is localhost port 8090
-    - `chmod a+x stream.sh`
+    - reboot
+2. Clone this repository
+```bash
+git clone https://github.com/attackle/nomad-rpi.git
+cd nomad-rpi
+```
+3. Install requirements
+```bash
+pip3 install -r requirements.txt
+```
+4. Install dependencies
+```bash
+sudo apt install vlc libav-tools
+```
+5. Create script to livestream: 
+```bash
+cd ~
+echo "raspivid -t 0 -vf -hf -w 640 -h 480 -fps 15 -b 1000000 -o - | cvlc -vvv stream:///dev/stdin --sout '#standard{access=http,mux=ts,dst=:8090}' :demux=h264" > stream.sh
+chmod a+x stream.sh
+```
+- `-t 0 `: no timeout (stream indefinitely)
+- `-vf`: vertical flip (flip video vertically)
+- `-hf1`: horizontal flip (flip video horizontally)
+- `-w 640 -h 480`: video size 640x480 px
+- `-fps 15`: frames per second
+- `-b 1000000`: bit rate
+- `-o -`: output to STDIN
+- `access=http`: livestream can be accessed via HTTP
+- `dst=:8090`: destination is localhost port 8090
+
+&nbsp;
+
+## Testing
+
+Running unittests on the module
+```bash
+python3 -m unitest discover -v
+```
+
+&nbsp;
 
 ## Execution
 
-### Raspberry Pi
 From the home directory (`cd ~` to go there):
 - `./stream.sh` to start livestream
-- `cd ~/nomad/nomadBrain && python3 nomadBrain.py`
+- `cd ~/nomad-rpi && python3 brain.py`
