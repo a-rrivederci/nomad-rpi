@@ -49,7 +49,8 @@ class Rover(object):
         self.ARDUINO = Arduino(self.BAUDRATE)
         if self.ARDUINO.connect():
             self.print_data()
-        return
+            return True
+        return False
 
     def forward(self):
         """Foward method."""
@@ -76,7 +77,7 @@ class Rover(object):
 
         # Send command
         self.ARDUINO.send_str_data(cmd)
-        sleep(1)
+        sleep(0.1)
 
     def left(self):
         """Left method."""
