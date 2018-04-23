@@ -2,17 +2,16 @@
 
 Nomad modules for Raspberry Pi
 
-## NOMAD :robot:
+## Index
 
-**Nomad** is the terrestrial agent of the Triple-N system. It is an explorer rover enabled with an object detecting trained model which can be controlled remotely.
-
----  
+1. [Setup](##setup)
+2. [Testing](##testing)
+3. [Execution](##execution)
 
 ## Setup
 
-### Raspberry Pi
-
-Tested with Raspberry Pi 3 Model B
+Setting up the Pi
+>Tested with Raspberry Pi 3 Model B
 
 1. `sudo raspi-config` and reboot
     - change user password
@@ -36,9 +35,17 @@ Tested with Raspberry Pi 3 Model B
     	- `dst=:8090`: destination is localhost port 8090
     - `chmod a+x stream.sh`
 
+&nbsp;
+## Testing
+
+Running unittests on the module
+```bash
+python -m unitests discover -v
+```
+
+&nbsp;
 ## Execution
 
-### Raspberry Pi
 From the home directory (`cd ~` to go there):
 - `./stream.sh` to start livestream
 - `cd ~/nomad/nomadBrain && python3 nomadBrain.py`
