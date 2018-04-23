@@ -40,13 +40,12 @@ class Arduino(object):
 class Rover(object):
 
     # command codes for Arduino
-    CMD_STOP = "0" + "\n"
-    CMD_FRWD = "1" + "\n"
-    CMD_BACK = "2" + "\n"
-    CMD_RGHT = "3" + "\n"
-    CMD_LEFT = "4" + "\n"
-    CMD_SENS = "5" + "\n"
-    CMD_BATT = "6" + "\n"
+    CMD_STOP = "A" + "\n"
+    CMD_FRWD = "B" + "\n"
+    CMD_BACK = "C" + "\n"
+    CMD_RGHT = "D" + "\n"
+    CMD_LEFT = "E" + "\n"
+    CMD_SENS = "F" + "\n"
 
     ROOT_LOGGER = logging.getLogger("nomad")
     ROOT_LOGGER.setLevel(level=logging.INFO)
@@ -57,7 +56,7 @@ class Rover(object):
     LOG_HANDLER.setFormatter(LOG_FORMATTER)
     ROOT_LOGGER.addHandler(LOG_HANDLER)
 
-    PY_LOGGER = logging.getLogger("nomad.rpi")
+    PY_LOGGER = logging.getLogger("nomad.rover")
     MCU_LOGGER = logging.getLogger("nomad.arduino")
 
     def __init__(self):
@@ -66,13 +65,13 @@ class Rover(object):
         self.connected = False
         self.port = None
         # Get likely arduino connection
-        seq = re.compile(r'/dev/ttyACM[0-9]')
+        seq = re.compile(r'/dev/ttyACM[0-9]|COM[0-9]')
         ports = list(serial.tools.list_ports.comports())
         if ports == []:
             Rover.PY_LOGGER.warning("No ports found")
         for portString in ports:
             # If uno is found in string
-            if 'ACM' in str(portString):
+            if ('ACM' in str(portString) or 'Arduino' in str(portString)):
                 # Find out com port and connect
                 self.port = seq.match(str(portString)).group()
                 self.arduino = Arduino("nomad", self.port)
@@ -90,7 +89,7 @@ class Rover(object):
         
         # Send command
         self.arduino.send_str_data(Rover.CMD_FRWD)
-        sleep(1)
+        sleep(0.1)
         self.arduino.send_str_data(Rover.CMD_STOP)
 
     def back(self):
@@ -101,7 +100,7 @@ class Rover(object):
         
         # Send command
         self.arduino.send_str_data(Rover.CMD_BACK)
-        sleep(1)
+        sleep(0.1)
         self.arduino.send_str_data(Rover.CMD_STOP)
 
     def right(self):
@@ -112,7 +111,7 @@ class Rover(object):
         
         # Send command
         self.arduino.send_str_data(Rover.CMD_RGHT)
-        sleep(1)
+        sleep(0.1)
         self.arduino.send_str_data(Rover.CMD_STOP)
 
     def left(self):
@@ -123,7 +122,7 @@ class Rover(object):
         
         # Send command
         self.arduino.send_str_data(Rover.CMD_LEFT)
-        sleep(1)
+        sleep(0.1)
         self.arduino.send_str_data(Rover.CMD_STOP)
 
     def sensor(self):
@@ -138,7 +137,7 @@ class Rover(object):
         msg = ""
         while True:
             m = self.arduino.read_str_data()
-            if m == '>':
+            if m == '~':
                 break
             else:
                 msg += m
@@ -160,7 +159,7 @@ class Rover(object):
         msg = ""
         while True:
             m = self.arduino.read_str_data()
-            if m == '>':
+            if m == '~':
                 break
             else:
                 msg += m
@@ -172,7 +171,7 @@ class Rover(object):
     def print_info(self):
         while True:
             msg = self.arduino.read_str_data()
-            if msg == '>':
+            if msg == '~':
                 break
             else:
                 Rover.MCU_LOGGER.info(msg)
