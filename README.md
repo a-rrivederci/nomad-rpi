@@ -64,6 +64,6 @@ python3 -m unitest discover -v
 
 ## Execution
 
-From the home directory (`cd ~` to go there):
-- `./stream.sh` to start livestream
-- `cd ~/nomad-rpi && python3 brain.py`
+```bash
+bash ~/nomad-rpi/start.sh
+```

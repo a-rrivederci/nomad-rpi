@@ -6,6 +6,7 @@ from api import Rover
 DB = None
 ROVER = None
 
+# firebase configuration
 config = {
     "apiKey": "AIzaSyDKstoSby1YdpTfy7xqAiDPt5Ta50PoOIw",
     "authDomain": "nomad-e1934.firebaseapp.com",
@@ -13,6 +14,16 @@ config = {
     "projectId": "nomad-e1934",
     "storageBucket": "nomad-e1934.appspot.com",
 }
+
+# firebase test configuration (Salman)
+# config = {
+#     "apiKey": "AIzaSyAR_rQR6qfxSw7UPcUt0Lw6d3OojWtMmEI",
+#     "authDomain": "rpi-resin-test.firebaseapp.com",
+#     "databaseURL": "https://rpi-resin-test.firebaseio.com",
+#     "projectId": "rpi-resin-test",
+#     "storageBucket": "rpi-resin-test.appspot.com",
+#     "messagingSenderId": "726499918359"
+#   }
 
 # def getState():
 #     global DB
