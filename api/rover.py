@@ -106,9 +106,12 @@ class Rover(object):
                 msg += m
 
         # sensor data
-        s1, s2, s3 = int(msg[2:5]), int(msg[5:8]), int(msg[8:11])
-        PY_LOGGER.info("Sensor Data: {}, {}, {}".format(s1,s2,s3))
-        return s1, s2, s3
+        data = {}
+        for sens in msg.split('\n')[1:-1]:
+            name, val = [i.strip() for i in sens.split(':')]
+            data[name] = int(val)
+        PY_LOGGER.info("Data: {}".format(data))
+        return data
 
     def print_data(self):
         """Print received data."""
