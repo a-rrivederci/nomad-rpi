@@ -8,34 +8,33 @@ ROVER = None
 
 # firebase configuration
 config = {
-    "apiKey": "AIzaSyDKstoSby1YdpTfy7xqAiDPt5Ta50PoOIw",
-    "authDomain": "nomad-e1934.firebaseapp.com",
-    "databaseURL": "https://nomad-e1934.firebaseio.com",
-    "projectId": "nomad-e1934",
-    "storageBucket": "nomad-e1934.appspot.com",
+    "apiKey": "AIzaSyD9QEbkOyk0B25L3s7X1T_wfBNuLrOyCuc",
+    "authDomain": "nomad-fire.firebaseapp.com",
+    "databaseURL": "https://nomad-fire.firebaseio.com",
+    "projectId": "nomad-fire",
+    "storageBucket": "nomad-fire.appspot.com",
+    "messagingSenderId": "1097082057466"
 }
 
-# firebase test configuration (Salman)
-# config = {
-#     "apiKey": "AIzaSyAR_rQR6qfxSw7UPcUt0Lw6d3OojWtMmEI",
-#     "authDomain": "rpi-resin-test.firebaseapp.com",
-#     "databaseURL": "https://rpi-resin-test.firebaseio.com",
-#     "projectId": "rpi-resin-test",
-#     "storageBucket": "rpi-resin-test.appspot.com",
-#     "messagingSenderId": "726499918359"
-#   }
-
-# def getState():
-#     global DB
-#     currentState = DB.child("PiMove").get()
-
-def stream_handler(message):
+def update_sensor_data():
+    """Update all the sensor data in firebase"""
     global DB
     global ROVER
-    sens1, sens2, sens3 = ROVER.sensor()
-    # batt_lvl = ROVER.battery()
-    data = {"Sensor1":sens1, "Sensor2":sens2, "Sensor3":sens3} #, "Battery":batt_lvl}
-    DB.child("PiMove").child("Sensors").set(data)
+
+    # Get sensor data
+    left_ir, mid_ir, right_ir = ROVER.sensor()
+    # Package message
+    data = {
+        "leftIR":left_ir,
+        "midIR":mid_ir,
+        "rightIR":right_ir,
+    }
+    # Update fields in firebase
+    DB.child("rpi").child("data").update(data)
+    return
+
+def stream_handler(message):
+    global ROVER
     print(message["data"])
     for x in message["data"]:
         if message["data"][x]:
@@ -52,7 +51,6 @@ def stream_handler(message):
                 # move rover left
                 ROVER.left()
 
-
 def main():
     global DB
     global ROVER
@@ -61,15 +59,15 @@ def main():
     # Database Variable
     DB = firebase.database()
 
-    # currentState = ""
-
     # initialize rover
     ROVER = Rover()
     if not ROVER.connect():
         print("Failed to connect to NOMAD Rover.")
         exit(1)
 
-    DB.child("PiMove").child("Movement").stream(stream_handler)
+    DB.child("rpi").child("movement").stream(stream_handler)
+    return
+
 
 if __name__ == "__main__":
     main()
