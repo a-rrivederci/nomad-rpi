@@ -103,7 +103,7 @@ class Rover(object):
             if m == self.END_CHAR:
                 break
             else:
-                msg += m
+                msg += m + "\n"
 
         # sensor data
         data = {}
