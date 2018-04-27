@@ -1,11 +1,15 @@
 import pyrebase
 import sys
 import logging
+from threading import Timer
 
 from api import Rover
 
 DB = None
 ROVER = None
+TIMER = None
+
+UPDATE_INTERVAL = 3 # interval to update sensor data in firebase (seconds)
 
 ROOT_LOGGER = logging.getLogger("nomad")
 ROOT_LOGGER.setLevel(level=logging.INFO)
@@ -33,13 +37,17 @@ def update_sensor_data():
     """Update all the sensor data in firebase"""
     global DB
     global ROVER
+    global TIMER
+    global UPDATE_INTERVAL
 
     # Get sensor data
     data = ROVER.sensor()
     
     # Update fields in firebase
     DB.child("rpi").child("data").update(data)
-    return
+
+    TIMER = Timer(UPDATE_INTERVAL, update_sensor_data)
+    TIMER.start()
 
 def stream_handler(message):
     global ROVER
@@ -74,6 +82,10 @@ def main():
         exit(1)
 
     DB.child("rpi").child("movement").stream(stream_handler)
+
+    TIMER = Timer(UPDATE_INTERVAL, update_sensor_data)
+    TIMER.start()
+    
     return
 
 if __name__ == "__main__":
