@@ -1,10 +1,23 @@
 import pyrebase
 import sys
+import logging
 
 from api import Rover
 
 DB = None
 ROVER = None
+
+ROOT_LOGGER = logging.getLogger("nomad")
+ROOT_LOGGER.setLevel(level=logging.INFO)
+LOG_HANDLER = logging.StreamHandler()
+LOG_FORMATTER = logging.Formatter(
+    fmt='%(asctime)s [%(name)s](%(levelname)s) %(message)s',
+    datefmt='%H:%M:%S'
+)
+LOG_HANDLER.setFormatter(LOG_FORMATTER)
+ROOT_LOGGER.addHandler(LOG_HANDLER)
+
+LOGGER = logging.getLogger("nomad.brain")
 
 # firebase configuration
 config = {
@@ -22,34 +35,29 @@ def update_sensor_data():
     global ROVER
 
     # Get sensor data
-    left_ir, mid_ir, right_ir = ROVER.sensor()
-    # Package message
-    data = {
-        "leftIR":left_ir,
-        "midIR":mid_ir,
-        "rightIR":right_ir,
-    }
+    data = ROVER.sensor()
+    
     # Update fields in firebase
     DB.child("rpi").child("data").update(data)
     return
 
 def stream_handler(message):
     global ROVER
-    print(message["data"])
-    for x in message["data"]:
-        if message["data"][x]:
-            if x == "up":
-                # move rover up
-                ROVER.forward()
-            elif x == "down":
-                # move rover down
-                ROVER.back()
-            elif x == "right":
-                # move rover right
-                ROVER.right()
-            elif x == "left":
-                # move rover left
-                ROVER.left()
+    if message["path"] == "/":
+        LOGGER.info(message["data"])
+    elif message["data"] == True:
+        if message["path"] == "/forward":
+            ROVER.forward()
+        elif message["path"] == "/backward":
+            ROVER.back()
+        elif message["path"] == "/right":
+            ROVER.right()
+        elif message["path"] == "/left":
+            ROVER.left()
+        else: # unrecognized message
+            LOGGER.info(message)
+    else: # unrecognized message
+        LOGGER.info(message)
 
 def main():
     global DB
@@ -62,12 +70,11 @@ def main():
     # initialize rover
     ROVER = Rover()
     if not ROVER.connect():
-        print("Failed to connect to NOMAD Rover.")
+        LOGGER.info("Failed to connect to NOMAD Rover.")
         exit(1)
 
     DB.child("rpi").child("movement").stream(stream_handler)
     return
-
 
 if __name__ == "__main__":
     main()
