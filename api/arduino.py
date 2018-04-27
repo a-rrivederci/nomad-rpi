@@ -60,7 +60,8 @@ class Arduino(object):
 
     def clear_buffer(self):
         """Flush serial buffer"""
-        self.conn.flush()
+        self.conn.flushInput()
+        self.conn.flushOutput()
         return
 
     def __del__(self):
