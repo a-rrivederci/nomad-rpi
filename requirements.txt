@@ -1,2 +1,2 @@
-pyrebase
-pyserial
+pyrebase==3.0.27
+pyserial==3.4
