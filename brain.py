@@ -7,6 +7,7 @@ from api import Rover
 
 DB = None
 ROVER = None
+TIME = 5 # secs
 
 # firebase configuration
 config = {
@@ -22,14 +23,15 @@ def update_sensor_data():
     """Update all the sensor data in firebase"""
     global DB
     global ROVER
+    global TIME
 
     # Get sensor data
     data = ROVER.sensor()
     # Update fields in firebase
     DB.child("rpi").child("data").update(data)
 
-    # Set next timer for 1Hz
-    set_timer(1)
+    # Set next timer for 0.2Hz
+    set_timer(TIME)
     return
 
 def set_timer(timeout):
@@ -58,6 +60,8 @@ def stream_handler(message):
 def main():
     global DB
     global ROVER
+    global TIME
+
     firebase = pyrebase.initialize_app(config)
 
     # Database variable
@@ -72,8 +76,8 @@ def main():
     # Read firebase stream
     DB.child("rpi").child("movement").stream(stream_handler)
 
-    # Update firebase data and set the frequency to 1Hz
-    set_timer(1)
+    # Update firebase data and set the frequency to 0.2Hz
+    set_timer(TIME)
 
     # If Loop
     while True:
