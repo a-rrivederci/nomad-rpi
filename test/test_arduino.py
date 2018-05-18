@@ -1,27 +1,21 @@
 import unittest
-import serial.tools.list_ports
-from api.arduino import Arduino
+from api.arduino import ArduinoUno
 
 class TestArduino(unittest.TestCase):
-    def setUp(self):
-        self.ard = Arduino(9600)
+
+    @classmethod
+    def setUpClass(self):
+        super().setUpClass()
+        self.uno = ArduinoUno()
+
+    def test_import(self):
+        '''Check the baudrate and end character from the current protocol'''
+        self.assertEqual(self.uno.ard_port, None)
+        self.assertEqual(self.uno.id, "VID:PID=2341:0043")
 
     def test_connection(self):
-        """Test arduino module"""
-        ports = list(serial.tools.list_ports.comports())
-
-        if ports == []:
-           self.assertFalse(self.ard.connect())
-        else:
-            for portString in ports:
-                if ('ACM' in str(portString)) or ('Arduino' in str(portString)):
-                    a = self.ard
-                    a.connect()
-                    # Read responses
-                    self.assertEqual(a.read_str_data(), "NOMAD Uno v2.0.0")
-                    self.assertEqual(a.read_str_data(), '~')
-                else:
-                    self.assertFalse(self.ard.connect())
+        '''Test arduino module'''
+        pass
 
 if __name__ == '__main__':
     unittest.main()

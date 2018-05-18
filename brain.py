@@ -1,92 +1,92 @@
-import pyrebase
+import os
 import sys
 import logging
 from threading import Timer
 
 from api import Rover
+from api import Firebase
 
-DB = None
-ROVER = None
-TIMER = None
 
-UPDATE_INTERVAL = 3 # interval to update sensor data in firebase (seconds)
-
-ROOT_LOGGER = logging.getLogger("nomad")
-ROOT_LOGGER.setLevel(level=logging.INFO)
+ROOT = logging.getLogger(__name__)
+ROOT.setLevel(level=logging.DEBUG)
 LOG_HANDLER = logging.StreamHandler()
 LOG_FORMATTER = logging.Formatter(
     fmt='%(asctime)s [%(name)s](%(levelname)s) %(message)s',
     datefmt='%H:%M:%S'
 )
 LOG_HANDLER.setFormatter(LOG_FORMATTER)
-ROOT_LOGGER.addHandler(LOG_HANDLER)
+ROOT.addHandler(LOG_HANDLER)
 
-LOGGER = logging.getLogger("nomad.brain")
+class Brain(object):
+    '''Raspberry Pi control center'''
 
-# firebase configuration
-config = {
-    "apiKey": "AIzaSyD9QEbkOyk0B25L3s7X1T_wfBNuLrOyCuc",
-    "authDomain": "nomad-fire.firebaseapp.com",
-    "databaseURL": "https://nomad-fire.firebaseio.com",
-    "projectId": "nomad-fire",
-    "storageBucket": "nomad-fire.appspot.com",
-    "messagingSenderId": "1097082057466"
-}
+    def __init__(self):
+        self.LOG = logging.getLogger(f"{__name__}.{__class__.__name__}")
 
-def update_sensor_data():
-    """Update all the sensor data in firebase"""
-    global DB
-    global ROVER
-    global TIMER
-    global UPDATE_INTERVAL
+        # Class variables
+        self.interval = 2 # secs
 
-    # Get sensor data
-    data = ROVER.sensor()
+        # Class objects
+        self.data_timer = Timer(self.interval, self.update_sensor_data)
+        self.rover = Rover()
+        self.db = Firebase().database
+
+        if not self.rover.connect():
+            self.LOG.info("Failed to connect to NOMAD Rover.")
+            sys.exit(1)
+
+    def movement_handler(self, msg: dict) -> None:
+        '''Track and handle changes in the 'movement' node of the database'''
+        self.LOG.info(msg)
+
+        if msg["path"] == "/":
+            self.LOG.info(msg["data"])
     
-    # Update fields in firebase
-    DB.child("rpi").child("data").update(data)
-
-    TIMER = Timer(UPDATE_INTERVAL, update_sensor_data)
-    TIMER.start()
-
-def stream_handler(message):
-    global ROVER
-    if message["path"] == "/":
-        LOGGER.info(message["data"])
-    elif message["data"] == True:
-        if message["path"] == "/forward":
-            ROVER.forward()
-        elif message["path"] == "/backward":
-            ROVER.back()
-        elif message["path"] == "/right":
-            ROVER.right()
-        elif message["path"] == "/left":
-            ROVER.left()
-        else: # unrecognized message
-            LOGGER.info(message)
-    else: # unrecognized message
-        LOGGER.info(message)
-
-def main():
-    global DB
-    global ROVER
-    firebase = pyrebase.initialize_app(config)
-
-    # Database Variable
-    DB = firebase.database()
-
-    # initialize rover
-    ROVER = Rover()
-    if not ROVER.connect():
-        LOGGER.info("Failed to connect to NOMAD Rover.")
-        exit(1)
-
-    DB.child("rpi").child("movement").stream(stream_handler)
-
-    TIMER = Timer(UPDATE_INTERVAL, update_sensor_data)
-    TIMER.start()
+        elif msg["data"] == True:
+            if msg["path"] == "/forward":
+                self.rover.move(self.rover.FWRD)
     
-    return
+            elif msg["path"] == "/backward":
+                self.rover.move(self.rover.BACK)
+
+            elif msg["path"] == "/right":
+                self.rover.move(self.rover.RGHT)
+
+            elif msg["path"] == "/left":
+                self.rover.move(self.rover.LEFT)
+
+            else: # unrecognized msg
+                self.LOG.info(msg)
+
+        else: # unrecognized msg
+            self.LOG.info(msg)
+
+        return
+    
+    def update_sensor_data(self) -> None:
+        '''Update all the sensor data in firebase'''
+        # Get sensor data
+        data = self.rover.get_sensors()
+
+        # Update fields in firebase
+        self.db.child("data").update(data)
+
+        # Restart timer
+        self.data_timer.start()
+        return
+    
+    def start_thinking(self) -> None:
+        '''Enter the matrix'''
+        # Set movement handler
+        self.db.child("movement").stream(self.movement_handler)
+        # Start data sender
+        self.data_timer.start()
+        self.LOG.info("Entering the Matrix ...\n")
+
+        return
+
 
 if __name__ == "__main__":
-    main()
+    BRAIN = Brain()
+    BRAIN.start_thinking()
+    sys.exit(0)

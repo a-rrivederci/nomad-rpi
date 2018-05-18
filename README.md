@@ -1,6 +1,6 @@
-# nomad-rpi
+# NOMAD Pi
 
-Nomad modules for Raspberry Pi
+Modules for Raspberry Pi
 
 ## Index
 
@@ -65,5 +65,5 @@ python3 -m unitest discover -v
 ## Execution
 
 ```bash
-bash ~/nomad-rpi/start.sh
+bash ~/nomad-rpi/start.sh 
 ```
