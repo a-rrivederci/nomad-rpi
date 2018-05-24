@@ -92,7 +92,9 @@ class Rover(object):
         data = {}
         while True:
             line = self.ARDUINO.read_str(strip=1)
-            if line == self.READY_CHAR:
+            if line == self.ASSERT_CHAR:
+                self.ROV_LOG.info(f"Asserted {line}\n")
+            elif line == self.READY_CHAR:
                 break
             else:
                 label, value = line.split(':')
@@ -106,7 +108,9 @@ class Rover(object):
         '''Continously log all data on the port until protocol end'''
         while True:
             line = self.ARDUINO.read_str()
-            if line == self.READY_CHAR:
+            if line == self.ASSERT_CHAR:
+                self.ROV_LOG.info(f"Asserted {line}\n")
+            elif line == self.READY_CHAR:
                 break
             else:
                 self.MCU_LOG.info(line)

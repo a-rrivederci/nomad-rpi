@@ -118,7 +118,7 @@ class ArduinoUno(Microcontroller):
             # Find likely arduino board
             for meta in self.meta:
                 if self.id in meta:
-                    num = self.description.index(meta)
+                    num = self.meta.index(meta)
                     self.ard_port = self.ports[num]
 
                     # Establish connection
